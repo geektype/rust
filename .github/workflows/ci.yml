@@ -23,6 +23,7 @@ name: CI
       - try-perf
       - automation/bors/try
       - master
+      - optimise-docker-cache
   pull_request:
     branches:
       - "**"
