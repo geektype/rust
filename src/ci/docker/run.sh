@@ -95,7 +95,7 @@ if [ -f "$docker_dir/$image/Dockerfile" ]; then
 
     # On non-CI or PR jobs, we don't have permissions to write to the registry cache, so we should
     # not use `docker login` nor caching.
-    if [[ "$CI" == "" ]] || [[ "$PR_CI_JOB" == "1" ]];
+    if [[ "$CI" == "" ]];
     then
         retry docker build --rm -t rust-ci -f "$dockerfile" "$context"
     else
