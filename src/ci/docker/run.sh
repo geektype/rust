@@ -7,6 +7,7 @@ export MSYS_NO_PATHCONV=1
 script=`cd $(dirname $0) && pwd`/`basename $0`
 
 image=""
+
 dev=0
 
 while [[ $# -gt 0 ]]
@@ -94,7 +95,7 @@ if [ -f "$docker_dir/$image/Dockerfile" ]; then
 
     # On non-CI or PR jobs, we don't have permissions to write to the registry cache, so we should
     # not use `docker login` nor caching.
-    if [[ "$CI" == "" ]] || [[ "$PR_CI_JOB" == "1" ]];
+    if [[ "$CI" == "" ]];
     then
         retry docker build --rm -t rust-ci -f "$dockerfile" "$context"
     else
@@ -132,6 +133,7 @@ if [ -f "$docker_dir/$image/Dockerfile" ]; then
 
         # Tag the built image and push it to the registry
         docker tag rust-ci "${IMAGE_TAG}"
+        echo ">>>>>>>>>>>>>>>>>> ${IMAGE_TAG}" 
         docker push "${IMAGE_TAG}"
 
         # Record the container registry tag/url for reuse, e.g. by rustup.rs builds
@@ -293,37 +295,39 @@ if [ "$ENABLE_GCC_CODEGEN" = "1" ]; then
   echo "Setting extra environment values for docker: $extra_env"
 fi
 
-docker \
-  run \
-  --workdir /checkout/obj \
-  --env SRC=/checkout \
-  $extra_env \
-  $args \
-  --env CARGO_HOME=/cargo \
-  --env DEPLOY \
-  --env DEPLOY_ALT \
-  --env CI \
-  --env GITHUB_ACTIONS \
-  --env GITHUB_REF \
-  --env GITHUB_STEP_SUMMARY="/checkout/obj/${SUMMARY_FILE}" \
-  --env TOOLSTATE_REPO_ACCESS_TOKEN \
-  --env TOOLSTATE_REPO \
-  --env TOOLSTATE_PUBLISH \
-  --env RUST_CI_OVERRIDE_RELEASE_CHANNEL \
-  --env CI_JOB_NAME="${CI_JOB_NAME-$IMAGE}" \
-  --env BASE_COMMIT="$BASE_COMMIT" \
-  --env DIST_TRY_BUILD \
-  --env PR_CI_JOB \
-  --env OBJDIR_ON_HOST="$objdir" \
-  --env CODEGEN_BACKENDS \
-  --init \
-  --rm \
-  rust-ci \
-  "${command[@]}"
+echo "${command[@]}"
 
-cat $objdir/${SUMMARY_FILE} >> "${GITHUB_STEP_SUMMARY}"
+# docker \
+#   run \
+#   --workdir /checkout/obj \
+#   --env SRC=/checkout \
+#   $extra_env \
+#   $args \
+#   --env CARGO_HOME=/cargo \
+#   --env DEPLOY \
+#   --env DEPLOY_ALT \
+#   --env CI \
+#   --env GITHUB_ACTIONS \
+#   --env GITHUB_REF \
+#   --env GITHUB_STEP_SUMMARY="/checkout/obj/${SUMMARY_FILE}" \
+#   --env TOOLSTATE_REPO_ACCESS_TOKEN \
+#   --env TOOLSTATE_REPO \
+#   --env TOOLSTATE_PUBLISH \
+#   --env RUST_CI_OVERRIDE_RELEASE_CHANNEL \
+#   --env CI_JOB_NAME="${CI_JOB_NAME-$IMAGE}" \
+#   --env BASE_COMMIT="$BASE_COMMIT" \
+#   --env DIST_TRY_BUILD \
+#   --env PR_CI_JOB \
+#   --env OBJDIR_ON_HOST="$objdir" \
+#   --env CODEGEN_BACKENDS \
+#   --init \
+#   --rm \
+#   rust-ci \
+#   "${command[@]}"
 
-if [ -f /.dockerenv ]; then
-  rm -rf $objdir
-  docker cp checkout:/checkout/obj $objdir
-fi
+# cat $objdir/${SUMMARY_FILE} >> "${GITHUB_STEP_SUMMARY}"
+
+# if [ -f /.dockerenv ]; then
+#   rm -rf $objdir
+#   docker cp checkout:/checkout/obj $objdir
+# fi
