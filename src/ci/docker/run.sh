@@ -133,6 +133,7 @@ if [ -f "$docker_dir/$image/Dockerfile" ]; then
 
         # Tag the built image and push it to the registry
         docker tag rust-ci "${IMAGE_TAG}"
+        echo ">>>>>>>>>>>>>>>>>> ${IMAGE_TAG}" 
         docker push "${IMAGE_TAG}"
 
         # Record the container registry tag/url for reuse, e.g. by rustup.rs builds
